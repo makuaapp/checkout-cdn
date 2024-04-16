@@ -16,9 +16,15 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          const paths = [
-            "/gh/makuaapp/checkout-cdn@main/bundle.min.js"
-          ];
+          const branch = process.env.GITHUB_REF.split('/').pop();
+          let paths;
+
+          if (branch === 'main') {
+            paths = ["/gh/makuaapp/checkout-cdn@main/bundle.min.js"];
+          } else {
+            paths = ["/gh/makuaapp/checkout-cdn@staging/bundle.min.js"];
+          }
+
 
           const data = JSON.stringify({ path: paths });
 
