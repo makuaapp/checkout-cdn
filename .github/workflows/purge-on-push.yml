@@ -1,0 +1,41 @@
+name: Purge jsdelivr cache
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+
+jobs:
+
+  purge-jsdelivr-cache:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Purge jsdelivr cache
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const branch = process.env.GITHUB_REF.split('/').pop();
+          let paths;
+
+          if (branch === 'main') {
+            paths = ["/gh/makuaapp/checkout-cdn@main/bundle.min.js"];
+          } else {
+            paths = ["/gh/makuaapp/checkout-cdn@staging/bundle.min.js"];
+          }
+
+
+          const data = JSON.stringify({ path: paths });
+
+          const response = await fetch('https://purge.jsdelivr.net/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: data
+          });
+
+          if (!response.ok) {
+            throw new Error(`Unexpected response: ${response.status}`);
+          }
