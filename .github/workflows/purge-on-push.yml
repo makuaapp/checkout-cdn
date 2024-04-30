@@ -9,7 +9,6 @@ on:
 jobs:
 
   update-version-and-release:
-    needs: purge-jsdelivr-cache
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
@@ -46,7 +45,9 @@ jobs:
           release_name: Release ${{ steps.increment_version.outputs.version }}
           draft: false
           prerelease: false
+
   purge-jsdelivr-cache:
+    needs: update-version-and-release
     runs-on: ubuntu-latest
 
     steps:
@@ -57,7 +58,7 @@ jobs:
             const branch = process.env.GITHUB_REF.split('/').pop();
             let paths;
             if (branch === 'main') {
-              paths = ["/gh/makuaapp/checkout-cdn@main/bundle.min.js"];
+              paths = ["/gh/makuaapp/checkout-cdn@latest/bundle.min.js"];
             } else {
               paths = ["/gh/makuaapp/checkout-cdn@staging/bundle.min.js"];
             }
