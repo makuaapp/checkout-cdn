@@ -1,0 +1,22 @@
+{
+  "name": "checkout-cdn",
+  "version": "1.0.0",
+  "description": "The CDN repo for Makua Checkout",
+  "main": "bundle.min.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/makuaapp/checkout-cdn.git"
+  },
+  "keywords": [
+    "Makua"
+  ],
+  "author": "Nikit",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/makuaapp/checkout-cdn/issues"
+  },
+  "homepage": "https://github.com/makuaapp/checkout-cdn#readme"
+}

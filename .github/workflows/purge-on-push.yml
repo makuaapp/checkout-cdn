@@ -1,4 +1,4 @@
-name: Purge jsdelivr cache
+name: Purge jsdelivr cache and Create Release
 
 on:
   push:
@@ -8,34 +8,67 @@ on:
 
 jobs:
 
+  update-version-and-release:
+    needs: purge-jsdelivr-cache
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Get latest release version
+        id: get_latest_release
+        run: |
+          npm install -g semver
+          LATEST_RELEASE=$(git describe --tags --abbrev=0)
+          LATEST_VERSION=$(echo $LATEST_RELEASE | sed 's/^v//')
+          echo "::set-output name=version::$LATEST_VERSION"
+
+      - name: Increment version
+        id: increment_version
+        run: |
+          LATEST_VERSION=${{ steps.get_latest_release.outputs.version }}
+          NEW_VERSION=$(semver $LATEST_VERSION -i patch)
+          echo "::set-output name=version::$NEW_VERSION"
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.increment_version.outputs.version }}
+          release_name: Release ${{ steps.increment_version.outputs.version }}
+          draft: false
+          prerelease: false
   purge-jsdelivr-cache:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Purge jsdelivr cache
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const branch = process.env.GITHUB_REF.split('/').pop();
-          let paths;
-
-          if (branch === 'main') {
-            paths = ["/gh/makuaapp/checkout-cdn@main/bundle.min.js"];
-          } else {
-            paths = ["/gh/makuaapp/checkout-cdn@staging/bundle.min.js"];
-          }
-
-
-          const data = JSON.stringify({ path: paths });
-
-          const response = await fetch('https://purge.jsdelivr.net/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: data
-          });
-
-          if (!response.ok) {
-            throw new Error(`Unexpected response: ${response.status}`);
-          }
+      - name: Purge jsdelivr cache
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const branch = process.env.GITHUB_REF.split('/').pop();
+            let paths;
+            if (branch === 'main') {
+              paths = ["/gh/makuaapp/checkout-cdn@main/bundle.min.js"];
+            } else {
+              paths = ["/gh/makuaapp/checkout-cdn@staging/bundle.min.js"];
+            }
+            const data = JSON.stringify({ path: paths });
+            const response = await fetch('https://purge.jsdelivr.net/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: data
+            });
+            if (!response.ok) {
+              throw new Error(`Unexpected response: ${response.status}`);
+            }
