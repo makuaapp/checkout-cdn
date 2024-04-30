@@ -11,7 +11,7 @@
     "url": "git+https://github.com/makuaapp/checkout-cdn.git"
   },
   "keywords": [
-    "Makua"
+    "Makua","Checkout","CDN"
   ],
   "author": "Nikit",
   "license": "ISC",
