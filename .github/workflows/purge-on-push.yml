@@ -25,7 +25,7 @@ jobs:
         id: get_latest_release
         run: |
           npm install -g semver
-          LATEST_RELEASE=$(git describe --tags --abbrev=0)
+          LATEST_RELEASE=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
           LATEST_VERSION=$(echo $LATEST_RELEASE | sed 's/^v//')
           echo "::set-output name=version::$LATEST_VERSION"
 
